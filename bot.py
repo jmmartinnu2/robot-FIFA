@@ -43,7 +43,7 @@ async def on_message(message):
         elif tipo.lower() == "id":
             resultados = [agente for agente in agentes if agente["fifaId"].lower() == valor]
         elif tipo.lower() == "nombre":
-            resultados = [agente for agente in agentes si valor in (agente["firstName"].lower() + " " + agente["lastName"].lower())]
+            resultados = [agente for agente in agentes if valor in (agente["firstName"].lower() + " " + agente["lastName"].lower())]
 
         if resultados:
             respuesta = "\n\n".join([f"Nombre: {agente['firstName']} {agente['lastName']}\nLicencia: {agente['licenseNumber']}\nFIFA ID: {agente['fifaId']}\nEstado: {agente['licenseStatus']}\nAutorizado para menores: {agente['authorisedMinors']}" for agente in resultados])
