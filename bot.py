@@ -36,15 +36,18 @@ async def on_message(message):
         tipo = partes[1]
         valor = partes[2].lower()
 
-        # Usar un conjunto para eliminar duplicados
-        resultados = set()
+        # Usar una lista para almacenar resultados y eliminar duplicados
+        resultados = []
 
         if tipo.lower() == "licencia":
-            resultados = {agente for agente in agentes if agente["licenseNumber"].lower() == valor}
+            resultados = [agente for agente in agentes if agente["licenseNumber"].lower() == valor]
         elif tipo.lower() == "id":
-            resultados = {agente for agente in agentes if agente["fifaId"].lower() == valor}
+            resultados = [agente for agente in agentes if agente["fifaId"].lower() == valor]
         elif tipo.lower() == "nombre":
-            resultados = {agente for agente in agentes if valor in (agente["firstName"].lower() + " " + agente["lastName"].lower())}
+            for agente in agentes:
+                nombre_completo = (agente["firstName"].lower() + " " + agente["lastName"].lower())
+                if valor in nombre_completo and agente not in resultados:
+                    resultados.append(agente)
 
         if resultados:
             respuesta = "\n\n".join([f"Nombre: {agente['firstName']} {agente['lastName']}\nLicencia: {agente['licenseNumber']}\nFIFA ID: {agente['fifaId']}\nEstado: {agente['licenseStatus']}\nAutorizado para menores: {agente['authorisedMinors']}" for agente in resultados])
