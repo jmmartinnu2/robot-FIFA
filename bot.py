@@ -47,10 +47,12 @@ async def on_message(message):
 
         if resultados:
             respuesta = "\n\n".join([f"Nombre: {agente['firstName']} {agente['lastName']}\nLicencia: {agente['licenseNumber']}\nFIFA ID: {agente['fifaId']}\nEstado: {agente['licenseStatus']}\nAutorizado para menores: {agente['authorisedMinors']}" for agente in resultados])
+            
+            # Dividir la respuesta en partes si es demasiado larga
+            for i in range(0, len(respuesta), 2000):  # 2000 para dejar margen y evitar el límite de 4000 caracteres
+                await message.channel.send(respuesta[i:i+2000])
         else:
-            respuesta = "No se encontraron resultados."
-
-        await message.channel.send(respuesta)
+            await message.channel.send("No se encontraron resultados.")
 
 # Obtener el token de Discord de una variable de entorno
 token = os.getenv('DISCORD_TOKEN')
