@@ -2,13 +2,21 @@ import discord
 import json
 import os
 from dotenv import load_dotenv
+import streamlit as st
 
 # Cargar las variables de entorno desde el archivo .env
 load_dotenv()
 
+# Configurar Streamlit
+st.title("Bot FIFA")
+st.write("Interfaz para controlar y monitorear el bot de Discord.")
+
 # Cargar el archivo JSON con las licencias usando codificación utf-8
 with open(r'C:\Users\jmmar\Desktop\Bot-Agente\config.json', encoding='utf-8') as f:
     agentes = json.load(f)["content"]
+
+# Mostrar información básica o logs en Streamlit
+st.write("Número de agentes cargados:", len(agentes))
 
 # Configurar los intents necesarios
 intents = discord.Intents.default()
@@ -19,6 +27,7 @@ client = discord.Client(intents=intents)
 
 @client.event
 async def on_ready():
+    st.write(f'Bot {client.user} conectado')
     print(f'Bot {client.user} conectado')
 
 @client.event
@@ -56,6 +65,8 @@ async def on_message(message):
 token = os.getenv('DISCORD_TOKEN')
 
 if token is None:
+    st.error("El token de Discord no está configurado en las variables de entorno.")
     raise ValueError("El token de Discord no está configurado en las variables de entorno.")
 
+# Ejecutar el bot de Discord
 client.run(token)
