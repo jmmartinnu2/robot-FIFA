@@ -12,6 +12,7 @@ with open(os.path.join(os.path.dirname(__file__), 'config.json'), encoding='utf-
 
 # Configurar los intents necesarios
 intents = discord.Intents.default()
+intents.members = True  # Necesitas este intent para el evento on_member_join
 intents.message_content = True
 
 # Crear la instancia del bot
@@ -22,10 +23,50 @@ async def on_ready():
     print(f'Bot {client.user} conectado')
 
 @client.event
+async def on_member_join(member):
+    # Enviar un mensaje privado al nuevo miembro pidiendo el número de licencia
+    await member.send("¡Bienvenido al servidor! Por favor, proporciona tu número de licencia FIFA para verificar tu identidad:")
+
+    def check(m):
+        return m.author == member and isinstance(m.channel, discord.DMChannel)
+
+    try:
+        # Esperar la respuesta del usuario
+        msg = await client.wait_for('message', check=check, timeout=300)  # 5 minutos de tiempo límite
+
+        # Verificar el número de licencia
+        licencia_proporcionada = msg.content.strip()
+
+        agente_verificado = None
+        for agente in agentes:
+            if agente["licenseNumber"] == licencia_proporcionada:
+                agente_verificado = agente
+                break
+
+        if agente_verificado:
+            # Asignar un rol especial (debes crear el rol en tu servidor de Discord)
+            role = discord.utils.get(member.guild.roles, name="Agente FIFA")
+            if role:
+                await member.add_roles(role)
+            await member.send(f"¡Gracias, {agente_verificado['firstName']}! Se ha verificado que eres un Agente FIFA.")
+        else:
+            # Remover al usuario del servidor si no se verifica
+            await member.send("No se ha podido verificar que eres un Agente FIFA. Serás removido del servidor.")
+            await member.kick(reason="No se verificó como Agente FIFA")
+    except discord.errors.Forbidden:
+        print(f"No se pudo enviar un mensaje a {member.name}.")
+    except discord.errors.HTTPException:
+        print("Algo salió mal al intentar verificar al nuevo miembro.")
+    except discord.errors.TimeoutError:
+        await member.kick(reason="No proporcionó número de licencia a tiempo")
+
+@client.event
 async def on_message(message):
     if message.author == client.user:
         return
 
+    # Aquí va el código que ya tienes para manejar las búsquedas de agentes FIFA
+    # Ejemplo de comando: !buscar nombre Juan Pérez
     if message.content.startswith('!buscar'):
         partes = message.content.split(maxsplit=2)
         
