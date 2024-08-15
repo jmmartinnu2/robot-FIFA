@@ -6,13 +6,25 @@ from dotenv import load_dotenv
 # Cargar las variables de entorno desde el archivo .env
 load_dotenv()
 
-# Cargar el archivo JSON con las licencias usando una ruta relativa
+# Cargar el archivo JSON con las licencias y los registros de verificación
 with open(os.path.join(os.path.dirname(__file__), 'config.json'), encoding='utf-8') as f:
     agentes = json.load(f)["content"]
 
+# Cargar el archivo JSON que contiene los números de licencia ya verificados
+verificados_path = os.path.join(os.path.dirname(__file__), 'verificados.json')
+
+# Si el archivo no existe, crear uno nuevo
+if not os.path.exists(verificados_path):
+    with open(verificados_path, 'w', encoding='utf-8') as vf:
+        json.dump({"verificados": []}, vf)
+
+# Cargar los números de licencia ya verificados
+with open(verificados_path, encoding='utf-8') as vf:
+    verificados = json.load(vf)["verificados"]
+
 # Configurar los intents necesarios
 intents = discord.Intents.default()
-intents.members = True  # Necesitas este intent para el evento on_member_join
+intents.members = True
 intents.message_content = True
 
 # Crear la instancia del bot
@@ -24,18 +36,19 @@ async def on_ready():
 
 @client.event
 async def on_member_join(member):
-    # Enviar un mensaje privado al nuevo miembro pidiendo el número de licencia
     await member.send("¡Bienvenido al servidor! Por favor, proporciona tu número de licencia FIFA para verificar tu identidad:")
 
     def check(m):
         return m.author == member and isinstance(m.channel, discord.DMChannel)
 
     try:
-        # Esperar la respuesta del usuario
-        msg = await client.wait_for('message', check=check, timeout=300)  # 5 minutos de tiempo límite
-
-        # Verificar el número de licencia
+        msg = await client.wait_for('message', check=check, timeout=300)
         licencia_proporcionada = msg.content.strip()
+
+        if licencia_proporcionada in verificados:
+            await member.send("Este número de licencia ya ha sido utilizado. Se ha notificado a los administradores para revisar tu caso.")
+            # Aquí puedes agregar lógica para notificar a los administradores
+            return
 
         agente_verificado = None
         for agente in agentes:
@@ -44,13 +57,16 @@ async def on_member_join(member):
                 break
 
         if agente_verificado:
-            # Asignar un rol especial (debes crear el rol en tu servidor de Discord)
             role = discord.utils.get(member.guild.roles, name="Agente FIFA")
             if role:
                 await member.add_roles(role)
             await member.send(f"¡Gracias, {agente_verificado['firstName']}! Se ha verificado que eres un Agente FIFA.")
+            
+            # Registrar el número de licencia como verificado
+            verificados.append(licencia_proporcionada)
+            with open(verificados_path, 'w', encoding='utf-8') as vf:
+                json.dump({"verificados": verificados}, vf)
         else:
-            # Remover al usuario del servidor si no se verifica
             await member.send("No se ha podido verificar que eres un Agente FIFA. Serás removido del servidor.")
             await member.kick(reason="No se verificó como Agente FIFA")
     except discord.errors.Forbidden:
@@ -65,8 +81,7 @@ async def on_message(message):
     if message.author == client.user:
         return
 
-    # Aquí va el código que ya tienes para manejar las búsquedas de agentes FIFA
-    # Ejemplo de comando: !buscar nombre Juan Pérez
+    # Aquí va el código para manejar las búsquedas de agentes FIFA
     if message.content.startswith('!buscar'):
         partes = message.content.split(maxsplit=2)
         
@@ -77,7 +92,6 @@ async def on_message(message):
         tipo = partes[1]
         valor = partes[2].lower()
 
-        # Usar una lista para almacenar resultados y eliminar duplicados
         resultados = []
 
         if tipo.lower() == "licencia":
@@ -93,12 +107,11 @@ async def on_message(message):
         if resultados:
             respuesta = "\n\n".join([f"Nombre: {agente['firstName']} {agente['lastName']}\nLicencia: {agente['licenseNumber']}\nFIFA ID: {agente['fifaId']}\nEstado: {agente['licenseStatus']}\nAutorizado para menores: {agente['authorisedMinors']}" for agente in resultados])
 
-            # Verificar si la respuesta es demasiado larga
             if len(respuesta) > 2000:
-                for i in range(0, len(respuesta), 2000):  # Dividir si la respuesta es larga
+                for i in range(0, len(respuesta), 2000):
                     await message.channel.send(respuesta[i:i+2000])
             else:
-                await message.channel.send(respuesta)  # Enviar todo en un solo mensaje si no es demasiado largo
+                await message.channel.send(respuesta)
         else:
             await message.channel.send("No se encontraron resultados.")
 
