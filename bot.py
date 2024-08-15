@@ -11,8 +11,8 @@ load_dotenv()
 st.title("Bot FIFA")
 st.write("Interfaz para controlar y monitorear el bot de Discord.")
 
-# Cargar el archivo JSON con las licencias usando codificación utf-8
-with open(r'C:\Users\jmmar\Desktop\Bot-Agente\config.json', encoding='utf-8') as f:
+# Cargar el archivo JSON con las licencias usando una ruta relativa
+with open(os.path.join(os.path.dirname(__file__), 'config.json'), encoding='utf-8') as f:
     agentes = json.load(f)["content"]
 
 # Mostrar información básica o logs en Streamlit
