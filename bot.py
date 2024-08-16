@@ -2,7 +2,7 @@ import discord
 import json
 import os
 from dotenv import load_dotenv
-import asyncio  # Añadir asyncio para manejar las esperas
+import asyncio
 
 # Cargar las variables de entorno desde el archivo .env
 load_dotenv()
@@ -116,10 +116,17 @@ async def on_message(message):
                         f"FIFA ID: {agente_encontrado['fifaId']}\n"
                         f"Estado: {agente_encontrado['licenseStatus']}\n"
                         f"Autorizado para menores: {agente_encontrado['authorisedMinors']}")
-            await message.channel.send(respuesta)
+            try:
+                await message.channel.send(respuesta)
+            except discord.errors.HTTPException as e:
+                if e.status == 429:  # Rate limited
+                    retry_after = e.response.headers.get('Retry-After')
+                    if retry_after:
+                        await asyncio.sleep(float(retry_after))
+                        await message.channel.send(respuesta)
         else:
             await message.channel.send("No se encontraron resultados.")
-        
+
         # Esperar un momento entre mensajes para evitar la limitación de tasa
         await asyncio.sleep(1)
 
