@@ -91,7 +91,7 @@ async def on_message(message):
         tipo = partes[1].lower()
         valor = partes[2].lower()
 
-        # Inicializar la variable para almacenar el resultado único
+        # Variable para almacenar el primer resultado encontrado
         agente_encontrado = None
 
         # Buscar en la lista de agentes
@@ -108,7 +108,7 @@ async def on_message(message):
                     agente_encontrado = agente
                     break
 
-        # Si se encuentra un agente, generar y enviar la respuesta
+        # Si se encuentra un agente, enviar la respuesta
         if agente_encontrado:
             respuesta = (f"Nombre: {agente_encontrado['firstName']} {agente_encontrado['lastName']}\n"
                         f"Licencia: {agente_encontrado['licenseNumber']}\n"
