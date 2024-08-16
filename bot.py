@@ -91,29 +91,27 @@ async def on_message(message):
         tipo = partes[1]
         valor = partes[2].lower()
 
-        # Usar un conjunto para asegurar la unicidad de los agentes
-        resultados = set()
-        nombres_completos = set()
+        # Usar un diccionario para asegurar la unicidad de los agentes
+        resultados = {}
 
         if tipo.lower() == "licencia":
             for agente in agentes:
                 if agente["licenseNumber"].lower() == valor:
-                    resultados.add(agente)
+                    resultados[agente["licenseNumber"]] = agente
         elif tipo.lower() == "id":
             for agente in agentes:
                 if agente["fifaId"].lower() == valor:
-                    resultados.add(agente)
+                    resultados[agente["fifaId"]] = agente
         elif tipo.lower() == "nombre":
             for agente in agentes:
                 nombre_completo = (agente["firstName"].lower() + " " + agente["lastName"].lower())
-                if valor in nombre_completo and nombre_completo not in nombres_completos:
-                    resultados.add(agente)
-                    nombres_completos.add(nombre_completo)
+                if valor in nombre_completo:
+                    resultados[agente["licenseNumber"]] = agente
 
         if resultados:
             respuesta = "\n\n".join([
                 f"Nombre: {agente['firstName']} {agente['lastName']}\nLicencia: {agente['licenseNumber']}\nFIFA ID: {agente['fifaId']}\nEstado: {agente['licenseStatus']}\nAutorizado para menores: {agente['authorisedMinors']}" 
-                for agente in resultados
+                for agente in resultados.values()
             ])
 
             if len(respuesta) > 2000:
