@@ -91,22 +91,28 @@ async def on_message(message):
         tipo = partes[1]
         valor = partes[2].lower()
 
-        resultados = []
+        # Usar un diccionario para asegurar la unicidad de los resultados
+        resultados = {}
 
         if tipo.lower() == "licencia":
-            resultados = [agente for agente in agentes if agente["licenseNumber"].lower() == valor]
+            for agente in agentes:
+                if agente["licenseNumber"].lower() == valor:
+                    resultados[agente["licenseNumber"]] = agente
         elif tipo.lower() == "id":
-            resultados = [agente for agente in agentes if agente["fifaId"].lower() == valor]
+            for agente in agentes:
+                if agente["fifaId"].lower() == valor:
+                    resultados[agente["fifaId"]] = agente
         elif tipo.lower() == "nombre":
             for agente in agentes:
                 nombre_completo = (agente["firstName"].lower() + " " + agente["lastName"].lower())
-                if valor in nombre_completo and agente not in resultados:
-                    # Evitar duplicados en resultados
-                    if agente not in resultados:
-                        resultados.append(agente)
+                if valor in nombre_completo:
+                    resultados[nombre_completo] = agente
 
         if resultados:
-            respuesta = "\n\n".join([f"Nombre: {agente['firstName']} {agente['lastName']}\nLicencia: {agente['licenseNumber']}\nFIFA ID: {agente['fifaId']}\nEstado: {agente['licenseStatus']}\nAutorizado para menores: {agente['authorisedMinors']}" for agente in resultados])
+            respuesta = "\n\n".join([
+                f"Nombre: {agente['firstName']} {agente['lastName']}\nLicencia: {agente['licenseNumber']}\nFIFA ID: {agente['fifaId']}\nEstado: {agente['licenseStatus']}\nAutorizado para menores: {agente['authorisedMinors']}" 
+                for agente in resultados.values()
+            ])
 
             if len(respuesta) > 2000:
                 for i in range(0, len(respuesta), 2000):
