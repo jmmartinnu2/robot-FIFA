@@ -91,25 +91,30 @@ async def on_message(message):
         tipo = partes[1].lower()
         valor = partes[2].lower()
 
-        # Usar un conjunto para asegurar la unicidad de los agentes
-        resultados = {}
+        # Inicializar la variable para almacenar el resultado único
+        agente_encontrado = None
 
+        # Buscar en la lista de agentes
         for agente in agentes:
             if tipo == "licencia" and agente["licenseNumber"].lower() == valor:
-                resultados[agente["licenseNumber"]] = agente
+                agente_encontrado = agente
+                break
             elif tipo == "id" and agente["fifaId"].lower() == valor:
-                resultados[agente["fifaId"]] = agente
+                agente_encontrado = agente
+                break
             elif tipo == "nombre":
                 nombre_completo = (agente["firstName"].lower() + " " + agente["lastName"].lower())
                 if valor in nombre_completo:
-                    resultados[agente["licenseNumber"]] = agente
+                    agente_encontrado = agente
+                    break
 
-        if resultados:
-            respuesta = "\n\n".join([
-                f"Nombre: {agente['firstName']} {agente['lastName']}\nLicencia: {agente['licenseNumber']}\nFIFA ID: {agente['fifaId']}\nEstado: {agente['licenseStatus']}\nAutorizado para menores: {agente['authorisedMinors']}" 
-                for agente in resultados.values()
-            ])
-
+        # Si se encuentra un agente, generar y enviar la respuesta
+        if agente_encontrado:
+            respuesta = (f"Nombre: {agente_encontrado['firstName']} {agente_encontrado['lastName']}\n"
+                        f"Licencia: {agente_encontrado['licenseNumber']}\n"
+                        f"FIFA ID: {agente_encontrado['fifaId']}\n"
+                        f"Estado: {agente_encontrado['licenseStatus']}\n"
+                        f"Autorizado para menores: {agente_encontrado['authorisedMinors']}")
             await message.channel.send(respuesta)
         else:
             await message.channel.send("No se encontraron resultados.")
