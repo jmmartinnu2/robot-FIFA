@@ -122,7 +122,7 @@ async def on_message(message):
 # Obtener el token de Discord de una variable de entorno
 token = os.getenv('DISCORD_TOKEN')
 
-if token es None:
+if token is None:
     raise ValueError("El token de Discord no está configurado en las variables de entorno.")
 
 # Ejecutar el bot de Discord
