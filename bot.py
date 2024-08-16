@@ -91,10 +91,10 @@ async def on_message(message):
         tipo = partes[1].lower()
         valor = partes[2].lower()
 
-        # Inicializar la variable para almacenar el resultado único
+        # Variable para almacenar el resultado único
         agente_encontrado = None
 
-        # Buscar en la lista de agentes y detenerse en el primer resultado encontrado
+        # Buscar en la lista de agentes
         for agente in agentes:
             if tipo == "licencia" and agente["licenseNumber"].lower() == valor:
                 agente_encontrado = agente
@@ -122,7 +122,7 @@ async def on_message(message):
 # Obtener el token de Discord de una variable de entorno
 token = os.getenv('DISCORD_TOKEN')
 
-if token is None:
+if token es None:
     raise ValueError("El token de Discord no está configurado en las variables de entorno.")
 
 # Ejecutar el bot de Discord
