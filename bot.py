@@ -47,7 +47,6 @@ async def on_member_join(member):
 
         if licencia_proporcionada in verificados:
             await member.send("Este número de licencia ya ha sido utilizado. Se ha notificado a los administradores para revisar tu caso.")
-            # Aquí puedes agregar lógica para notificar a los administradores
             return
 
         agente_verificado = None
@@ -102,7 +101,9 @@ async def on_message(message):
             for agente in agentes:
                 nombre_completo = (agente["firstName"].lower() + " " + agente["lastName"].lower())
                 if valor in nombre_completo and agente not in resultados:
-                    resultados.append(agente)
+                    # Evitar duplicados en resultados
+                    if agente not in resultados:
+                        resultados.append(agente)
 
         if resultados:
             respuesta = "\n\n".join([f"Nombre: {agente['firstName']} {agente['lastName']}\nLicencia: {agente['licenseNumber']}\nFIFA ID: {agente['fifaId']}\nEstado: {agente['licenseStatus']}\nAutorizado para menores: {agente['authorisedMinors']}" for agente in resultados])
