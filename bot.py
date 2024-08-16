@@ -2,6 +2,7 @@ import discord
 import json
 import os
 from dotenv import load_dotenv
+import asyncio  # Añadir asyncio para manejar las esperas
 
 # Cargar las variables de entorno desde el archivo .env
 load_dotenv()
@@ -118,6 +119,9 @@ async def on_message(message):
             await message.channel.send(respuesta)
         else:
             await message.channel.send("No se encontraron resultados.")
+        
+        # Esperar un momento entre mensajes para evitar la limitación de tasa
+        await asyncio.sleep(1)
 
 # Obtener el token de Discord de una variable de entorno
 token = os.getenv('DISCORD_TOKEN')
