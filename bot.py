@@ -91,10 +91,10 @@ async def on_message(message):
         tipo = partes[1].lower()
         valor = partes[2].lower()
 
-        # Variable para almacenar el primer resultado encontrado
+        # Inicializar la variable para almacenar el resultado único
         agente_encontrado = None
 
-        # Buscar en la lista de agentes
+        # Buscar en la lista de agentes y detenerse en el primer resultado encontrado
         for agente in agentes:
             if tipo == "licencia" and agente["licenseNumber"].lower() == valor:
                 agente_encontrado = agente
@@ -103,7 +103,7 @@ async def on_message(message):
                 agente_encontrado = agente
                 break
             elif tipo == "nombre":
-                nombre_completo = (agente["firstName"].lower() + " " + agente["lastName"].lower())
+                nombre_completo = f"{agente['firstName'].lower()} {agente['lastName'].lower()}"
                 if valor in nombre_completo:
                     agente_encontrado = agente
                     break
