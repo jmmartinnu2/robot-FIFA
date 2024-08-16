@@ -94,19 +94,18 @@ async def on_message(message):
         # Usar un diccionario para asegurar la unicidad de los agentes
         resultados = {}
 
-        if tipo.lower() == "licencia":
-            for agente in agentes:
-                if agente["licenseNumber"].lower() == valor:
-                    resultados[agente["licenseNumber"]] = agente
-        elif tipo.lower() == "id":
-            for agente in agentes:
-                if agente["fifaId"].lower() == valor:
-                    resultados[agente["fifaId"]] = agente
-        elif tipo.lower() == "nombre":
-            for agente in agentes:
+        for agente in agentes:
+            if tipo.lower() == "licencia" and agente["licenseNumber"].lower() == valor:
+                resultados[agente["licenseNumber"]] = agente
+                break  # Terminar la búsqueda si encontramos el resultado
+            elif tipo.lower() == "id" and agente["fifaId"].lower() == valor:
+                resultados[agente["fifaId"]] = agente
+                break  # Terminar la búsqueda si encontramos el resultado
+            elif tipo.lower() == "nombre":
                 nombre_completo = (agente["firstName"].lower() + " " + agente["lastName"].lower())
                 if valor in nombre_completo:
                     resultados[agente["licenseNumber"]] = agente
+                    break  # Terminar la búsqueda si encontramos el resultado
 
         if resultados:
             respuesta = "\n\n".join([
