@@ -88,24 +88,21 @@ async def on_message(message):
             await message.channel.send("Formato incorrecto. Usa: !buscar <tipo> <valor>")
             return
         
-        tipo = partes[1]
+        tipo = partes[1].lower()
         valor = partes[2].lower()
 
-        # Usar un diccionario para asegurar la unicidad de los agentes
+        # Usar un conjunto para asegurar la unicidad de los agentes
         resultados = {}
 
         for agente in agentes:
-            if tipo.lower() == "licencia" and agente["licenseNumber"].lower() == valor:
+            if tipo == "licencia" and agente["licenseNumber"].lower() == valor:
                 resultados[agente["licenseNumber"]] = agente
-                break  # Terminar la búsqueda si encontramos el resultado
-            elif tipo.lower() == "id" and agente["fifaId"].lower() == valor:
+            elif tipo == "id" and agente["fifaId"].lower() == valor:
                 resultados[agente["fifaId"]] = agente
-                break  # Terminar la búsqueda si encontramos el resultado
-            elif tipo.lower() == "nombre":
+            elif tipo == "nombre":
                 nombre_completo = (agente["firstName"].lower() + " " + agente["lastName"].lower())
                 if valor in nombre_completo:
                     resultados[agente["licenseNumber"]] = agente
-                    break  # Terminar la búsqueda si encontramos el resultado
 
         if resultados:
             respuesta = "\n\n".join([
@@ -113,11 +110,7 @@ async def on_message(message):
                 for agente in resultados.values()
             ])
 
-            if len(respuesta) > 2000:
-                for i in range(0, len(respuesta), 2000):
-                    await message.channel.send(respuesta[i:i+2000])
-            else:
-                await message.channel.send(respuesta)
+            await message.channel.send(respuesta)
         else:
             await message.channel.send("No se encontraron resultados.")
 
